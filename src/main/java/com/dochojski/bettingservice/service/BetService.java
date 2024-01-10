@@ -25,14 +25,20 @@ public class BetService {
     }
 
     public Optional<Bet> updateBet(Long betId, Bet updatedBet) {
-        return betRepository.findById(betId)
-                .map(bet -> {
-                    bet.getAmount(updatedBet.getAmount());
-                    bet.getOdds(updatedBet.getOdds());
-                    bet.getBetType(updatedBet.getBetType());
-                    return betRepository.save(bet);
+        return Optional.ofNullable(betRepository.findById(betId)
+                .map(existingBet -> {
+                    if (updatedBet.getAmount() != null) {
+                        existingBet.setAmount(updatedBet.getAmount());
+                    }
+                    if (updatedBet.getOdds() != null) {
+                        existingBet.setOdds(updatedBet.getOdds());
+                    }
+                    if (updatedBet.getBetType() != null) {
+                        existingBet.setBetType(updatedBet.getBetType());
+                    }
+                    return betRepository.save(existingBet);
                 })
-                .orElseThrow(() -> new BetNotFoundException("Bet not found with id: " + betId));
+                .orElseThrow(() -> new BetNotFoundException("Bet not found with id: " + betId)));
     }
 
     public void deleteBet(Long betId) {
